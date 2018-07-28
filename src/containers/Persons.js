@@ -1,47 +1,69 @@
 import React, { Component } from 'react';
-import { Table, Button, FormGroup, FormControl } from 'react-bootstrap';
+import { Table, Button, FormGroup, FormControl, Panel } from 'react-bootstrap';
 import { connect } from 'react-redux';
 import { RingLoader } from 'react-spinners';
 import moment from 'moment';
 import Modal from 'react-responsive-modal';
+import ErrorUpdate from '../components/ErrorUpdate';
+
+//Including custom CSS file
+import './Persons.css';
 
 //Importing actions
 import { getPersonsCall, deletePersonCall, updatePersonCall } from '../actions/personActions';
 
 
 class Persons extends Component {
+
+    // Initial local state of the component
     state = {
         open: false,
         name: '',
         city: '',
         surname: '',
         phone: '',
-        address: ''
+        address: '',
+        error: null
     };
 
-    onOpenModal = () => {
-        this.setState({ open: true });
-    };
-
-    onCloseModal = () => {
-        this.setState({ open: false });
-    };
+    // == Lifecycle hooks == //
 
     componentDidMount() {
         this.props.getPersons();
     }
 
+    // == END Lifecycle hooks == //
+
+    // == Controlling Modal == // 
+
+    // Function to open the modal 
+    onOpenModal = () => {
+        this.setState({ open: true });
+    };
+
+    // Function to close the modal 
+    onCloseModal = () => {
+        this.setState({ open: false });
+    };
+
+    // == END Controlling Modal == // 
+
+    // == Handling the forms and changes within application == //
+
+    // Function to delete person
     handleDelete(e, personID) {
         e.preventDefault();
         this.props.deletePerson(personID);
     }
 
+    //Function to handle change of inputs
     handleChange(e) {
         this.setState({
             [e.target.name]: e.target.value
         });
     }
 
+    //Function to handle updating person
     handleUpdate(e, person) {
         e.preventDefault();
         this.setState({
@@ -55,15 +77,37 @@ class Persons extends Component {
         this.onOpenModal();
     }
 
+    //Function to handle submitting 'add new person'
     handleSubmit(e) {
         e.preventDefault();
-        console.log(this.state);
-        this.props.updatePerson(this.state);
-        this.onCloseModal();
+
+        //Handling validation 
+        const { name, surname, phone } = this.state;
+        if (typeof name !== 'string' || name.length < 4) {
+            this.setState({ error: 'The name must be minimum 5 characters of length and consist strings only' })
+        }
+        else if (typeof surname !== 'string' || surname.length < 4) {
+            this.setState({ error: 'The surname must be minimum 5 characters of length and consist strings only' })
+        }
+        else if (phone.length < 4) {
+            this.setState({ error: 'Minimum 5 numbers required' })
+        }
+        else {
+            //End of validation
+            this.props.updatePerson(this.state);
+            this.onCloseModal();
+            this.setState({
+                error: null
+            });
+        }
     }
 
+    // == END Handling the forms and changes within application == //
+
     render() {
+        // Checking the state of modal
         const { open } = this.state;
+        // Checking whether the persons are loaded from the backend or not. If not, the animation will pop up
         let persons = <RingLoader
             color={'#123abc'}
             loading={this.props.loading}
@@ -105,32 +149,38 @@ class Persons extends Component {
         }
         return (
             <div>
-                <h4>List of persons</h4>
-                {persons}
+                <Panel bsStyle="success">
+                    <Panel.Heading>
+                        <Panel.Title componentClass="h3">List of Persons</Panel.Title>
+                    </Panel.Heading>
+                    <Panel.Body>{persons}</Panel.Body>
+                </Panel>
                 <Modal open={open} onClose={this.onCloseModal} center>
                     <hr />
-                    <h4>Edit Person and click 'Update Person'</h4>
+                    <h4>Edit Person and then click 'Update Person' to save changes</h4>
+                    <hr />
                     <form onSubmit={(e) => { this.handleSubmit(e) }}>
                         <FormGroup>
-                            <FormControl type="text" name='name' value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Name" />
+                            <FormControl type="text" required name='name' value={this.state.name} onChange={this.handleChange.bind(this)} placeholder="Name" />
                         </FormGroup>
                         <FormGroup>
-                            <FormControl type="text" name='surname' value={this.state.surname} onChange={this.handleChange.bind(this)} placeholder="Surname" />
+                            <FormControl type="text" required name='surname' value={this.state.surname} onChange={this.handleChange.bind(this)} placeholder="Surname" />
                         </FormGroup>
                         <FormGroup>
-                            <FormControl type="text" name='city' value={this.state.city} onChange={this.handleChange.bind(this)} placeholder="City" />
+                            <FormControl type="text" required name='city' value={this.state.city} onChange={this.handleChange.bind(this)} placeholder="City" />
                         </FormGroup>
                         <FormGroup>
-                            <FormControl type="text" name='address' value={this.state.address} onChange={this.handleChange.bind(this)} placeholder="Address" />
+                            <FormControl type="text" required name='address' value={this.state.address} onChange={this.handleChange.bind(this)} placeholder="Address" />
                         </FormGroup>
                         <FormGroup>
-                            <FormControl type="text" name='phone' value={this.state.phone} onChange={this.handleChange.bind(this)} placeholder="Phone" />
+                            <FormControl type="text" required name='phone' value={this.state.phone} onChange={this.handleChange.bind(this)} placeholder="Phone" />
                         </FormGroup>
                         <FormGroup>
                             <Button type="submit" bsStyle="success">Update Person</Button>
                         </FormGroup>
-
                     </form>
+                    <hr />
+                    <ErrorUpdate displayError={this.state.error} />
                 </Modal>
             </div>
         );
@@ -140,7 +190,7 @@ class Persons extends Component {
 const mapStateToProps = (state) => {
     return {
         persons: state.persons.persons,
-        loading: state.persons.loading
+        loading: state.persons.loading,
     }
 };
 

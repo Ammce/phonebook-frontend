@@ -1,11 +1,12 @@
-// Person Reducer
+// Person Reducer //
 
+// Initializing the default state for person
 const personReducerDefaultState =
-    {
-        persons: [],
-        error: false,
-        loading: true
-    };
+{
+    persons: [],
+    error: null,
+    loading: true
+};
 
 const personReducer = (state = personReducerDefaultState, action) => {
     switch (action.type) {
@@ -14,11 +15,12 @@ const personReducer = (state = personReducerDefaultState, action) => {
                 ...state,
                 persons: action.persons.data.persons,
                 loading: false,
-                error: false
+                error: null
             }
         case 'ADD_PERSON':
             return {
                 ...state,
+                error: null,
                 persons: [...state.persons, { _id: action.person._id, name: action.person.name, surname: action.person.surname, city: action.person.city, address: action.person.address, phone: action.person.phone }]
             }
         case 'UPDATE_PERSON':
@@ -31,7 +33,8 @@ const personReducer = (state = personReducerDefaultState, action) => {
                     person.phone = action.person.person.phone;
                     return {
                         ...state,
-                        person
+                        person,
+                        error: null
                     };
                 }
             })
@@ -41,7 +44,13 @@ const personReducer = (state = personReducerDefaultState, action) => {
             })
             return {
                 ...state,
-                persons: newArray
+                persons: newArray,
+                error: null
+            }
+        case 'ERROR_HANDLER':
+            return {
+                ...state,
+                error: action.myError
             }
         default:
             return state;
