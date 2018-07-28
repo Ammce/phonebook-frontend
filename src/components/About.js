@@ -9,6 +9,9 @@ const About = () => {
     const smallHeaderStyles = {
         color: '#dff0d8'
     }
+    const aStyle = {
+        color: '#3D9970'
+    }
     return (
         <div>
             <PageHeader style={headerStyles}>
@@ -16,8 +19,8 @@ const About = () => {
             </PageHeader>
             <Alert bsStyle="success">
                 This application is running on Heroku free server, so it will take around 30 seconds to run the server because server is going to 'sleep' after every 30 minutes of inactivity.
-                GITHUB BACKEND / GITHUB FRONTEND
-                </Alert>
+                <p><a style={aStyle} target='_blank' href="https://github.com/Ammce/phonebook-frontendm"> FrontEnd GitHub </a> / <a style={aStyle} target='_blank' href="https://github.com/Ammce/phonebookapi"> BackEnd GitHub </a></p>
+            </Alert>
         </div>
     );
 };
